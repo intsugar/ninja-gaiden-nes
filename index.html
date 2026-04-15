@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Ninja Gaiden | NES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a1a2e;
+      background-image:
+        radial-gradient(ellipse at 50% 0%, #2a2a4a 0%, #1a1a2e 70%);
+      color: #ccc;
+      font-family: 'Press Start 2P', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── NES Console Shell ── */
+    #console-body {
+      background: linear-gradient(180deg, #d4d0c8 0%, #c8c4bc 40%, #b8b4ac 100%);
+      border-radius: 12px 12px 8px 8px;
+      padding: 9px 22px 11px;
+      box-shadow:
+        0 2px 0 #e8e4dc inset,
+        0 -2px 0 #a09c94 inset,
+        2px 0 0 #bbb8b0 inset,
+        -2px 0 0 #bbb8b0 inset,
+        0 8px 32px rgba(0,0,0,0.5);
+      position: relative;
+      max-width: 540px;
+      width: 95vw;
+    }
+
+    /* Red top stripe */
+    #console-body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #c8c4bc 0%, #c8c4bc 28%, #cc1228 28%, #cc1228 72%, #c8c4bc 72%);
+      border-radius: 12px 12px 0 0;
+    }
+
+    /* Dark cartridge slot stripe */
+    #cartridge-slot {
+      background: linear-gradient(180deg, #2a2a2a, #3a3a3a);
+      height: 8px;
+      border-radius: 3px;
+      margin: 0 40px 6px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 -1px 2px rgba(0,0,0,0.4) inset;
+    }
+
+    /* Flap line */
+    #flap-line {
+      height: 2px;
+      background: #a8a49c;
+      margin: 0 10px 7px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    /* ── Title label ── */
+    #title-label {
+      text-align: center;
+      margin-bottom: 5px;
+      white-space: nowrap;
+    }
+    #title-label .brand {
+      font-size: 0.45rem;
+      color: #888;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 2px;
+    }
+    #title-label .game-name {
+      font-size: 0.62rem;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* ── Screen bezel ── */
+    #screen-bezel {
+      background: #1c1c1c;
+      border-radius: 6px;
+      padding: 5px;
+      margin: 0 auto;
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.5) inset,
+        0 0 0 2px #2a2a2a;
+    }
+    #screen-wrapper {
+      position: relative;
+      border: 2px solid #0a0a0a;
+      border-radius: 3px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 0 20px rgba(0, 200, 0, 0.03);
+    }
+    canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    /* Scanline overlay */
+    #screen-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.12) 2px,
+        rgba(0,0,0,0.12) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* Power LED */
+    #power-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 5px;
+      padding: 0 8px;
+    }
+    .led-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .led-label {
+      font-size: 0.4rem;
+      color: #777;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #3a1a1a;
+      box-shadow: 0 0 2px rgba(0,0,0,0.5) inset;
+    }
+    .led.on {
+      background: #ff2020;
+      box-shadow: 0 0 6px #ff2020, 0 0 14px rgba(255, 32, 32, 0.4);
+    }
+
+    /* ── Buttons ── */
+    #start-btn {
+      margin-top: 7px;
+      padding: 6px 28px;
+      font-size: 0.65rem;
+      font-family: 'Press Start 2P', monospace;
+      background: #cc1228;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: none;
+      box-shadow: 0 3px 0 #8a0a1a, 0 4px 8px rgba(0,0,0,0.3);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    #start-btn:hover {
+      transform: translateY(1px);
+      box-shadow: 0 2px 0 #8a0a1a, 0 3px 6px rgba(0,0,0,0.3);
+    }
+    #start-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 0px 0 #8a0a1a;
+    }
+
+    #loading {
+      color: #cc1228;
+      font-size: 0.6rem;
+      margin-top: 8px;
+      letter-spacing: 1px;
+      animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* ── Desktop keyboard hints ── */
+    #controls {
+      margin-top: 7px;
+      font-size: 0.45rem;
+      text-align: center;
+      color: #666;
+      line-height: 2.2;
+      letter-spacing: 0.5px;
+    }
+    #controls kbd {
+      background: #c8c4bc;
+      border: 1px solid #a09c94;
+      border-bottom: 2px solid #888480;
+      border-radius: 3px;
+      padding: 2px 7px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.38rem;
+      color: #333;
+    }
+
+    /* ── Mobile Controller Area ── */
+    #mobile-controls {
+      display: none;
+      width: 100%;
+      max-width: 512px;
+      margin-top: 4px;
+      padding: 8px 0;
+      position: relative;
+      height: 170px;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      background: linear-gradient(180deg, #d4d0c8, #c0bdb5);
+      border-radius: 0 0 30px 30px / 0 0 20px 20px;
+      box-shadow:
+        0 4px 12px rgba(0,0,0,0.3),
+        0 1px 0 #e0dcd4 inset;
+    }
+
+    /* Joystick – dark recessed circle like NES d-pad area */
+    .joystick-zone {
+      position: absolute;
+      left: 16px;
+      top: 10px;
+      width: 140px;
+      height: 140px;
+    }
+    .joystick-base {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: #2a2a2a;
+      border: 3px solid #1a1a1a;
+      box-shadow:
+        0 2px 6px rgba(0,0,0,0.5) inset,
+        0 2px 4px rgba(0,0,0,0.3);
+    }
+    .joystick-knob {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 35%, #555, #2a2a2a);
+      border: 2px solid #444;
+      box-shadow:
+        0 2px 4px rgba(0,0,0,0.6),
+        0 1px 0 rgba(255,255,255,0.1) inset;
+      transition: none;
+    }
+
+    /* NES-style round red A/B buttons */
+    .action-buttons {
+      position: absolute;
+      right: 16px;
+      top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: rotate(-15deg);
+    }
+    .action-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #e83040, #a01020);
+      border: 3px solid #8a0a16;
+      color: #fff;
+      font-size: 0.6rem;
+      font-family: 'Press Start 2P', monospace;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 3px 0 #6a0810,
+        0 4px 8px rgba(0,0,0,0.4),
+        0 1px 0 rgba(255,255,255,0.2) inset;
+    }
+    .action-btn:active, .action-btn.pressed {
+      box-shadow:
+        0 1px 0 #6a0810,
+        0 1px 3px rgba(0,0,0,0.4),
+        0 1px 0 rgba(255,255,255,0.1) inset;
+      transform: translateY(2px);
+    }
+    .btn-label {
+      font-size: 0.35rem;
+      color: #888;
+      text-align: center;
+      margin-top: 4px;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    /* NES-style pill Select/Start */
+    .meta-buttons {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 14px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .meta-btn-wrap {
+      text-align: center;
+    }
+    .meta-btn {
+      width: 50px;
+      height: 14px;
+      background: #555;
+      border: none;
+      border-radius: 7px;
+      box-shadow:
+        0 2px 0 #333,
+        0 1px 4px rgba(0,0,0,0.4),
+        0 1px 0 rgba(255,255,255,0.1) inset;
+      display: block;
+      margin: 0 auto;
+    }
+    .meta-btn:active, .meta-btn.pressed {
+      box-shadow:
+        0 0px 0 #333,
+        0 1px 2px rgba(0,0,0,0.4);
+      transform: translateY(2px);
+    }
+    .meta-label {
+      font-size: 0.32rem;
+      color: #777;
+      margin-top: 5px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    /* ── Bottom branding ── */
+    #bottom-brand {
+      margin-top: 8px;
+      font-size: 0.35rem;
+      color: #444;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    @media (pointer: coarse) {
+      #mobile-controls { display: block; }
+      #controls { display: none; }
+      #console-body {
+        border-radius: 12px 12px 0 0;
+        padding-bottom: 7px;
+      }
+    }
+
+    @media (pointer: fine) {
+      #mobile-controls { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="console-body">
+    <div id="cartridge-slot"></div>
+    <div id="flap-line"></div>
+
+    <div id="title-label">
+      <span class="brand">Nintendo</span>
+      <span class="game-name">Ninja Gaiden</span>
+    </div>
+
+    <div id="screen-bezel">
+      <div id="screen-wrapper">
+        <canvas id="nes-canvas" width="256" height="240"></canvas>
+      </div>
+    </div>
+
+    <div id="power-row">
+      <div class="led-group">
+        <span class="led" id="power-led"></span>
+        <span class="led-label">Power</span>
+      </div>
+      <div id="loading">Loading...</div>
+      <button id="start-btn">&#9654; Start</button>
+      <span class="led-label" style="visibility:hidden">Pad</span>
+    </div>
+  </div>
+
+  <!-- Mobile controller body -->
+  <div id="mobile-controls">
+    <div class="joystick-zone" id="joystick-zone">
+      <div class="joystick-base">
+        <div class="joystick-knob" id="joystick-knob"></div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <div>
+        <div class="action-btn" data-btn="B">B</div>
+      </div>
+      <div>
+        <div class="action-btn" data-btn="A">A</div>
+      </div>
+    </div>
+
+    <div class="meta-buttons">
+      <div class="meta-btn-wrap">
+        <div class="meta-btn" data-btn="SELECT"></div>
+        <div class="meta-label">Select</div>
+      </div>
+      <div class="meta-btn-wrap">
+        <div class="meta-btn" data-btn="START"></div>
+        <div class="meta-label">Start</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="controls">
+    <kbd>&#8592;&#8593;&#8594;&#8595;</kbd> Move &nbsp;&bull;&nbsp;
+    <kbd>Z</kbd> B &nbsp;&bull;&nbsp;
+    <kbd>X</kbd> A &nbsp;&bull;&nbsp;
+    <kbd>Enter</kbd> Start &nbsp;&bull;&nbsp;
+    <kbd>Shift</kbd> Select
+  </div>
+
+  <div id="bottom-brand">Entertainment System</div>
+
+  <script src="jsnes.min.js"></script>
+  <script>
+    const canvas = document.getElementById('nes-canvas');
+    const ctx = canvas.getContext('2d');
+    const imgData = ctx.createImageData(256, 240);
+    const startBtn = document.getElementById('start-btn');
+    const loadingEl = document.getElementById('loading');
+    const powerLed = document.getElementById('power-led');
+
+    // Scale canvas for display
+    function scaleCanvas() {
+      const wrapper = document.getElementById('screen-bezel');
+      const maxW = wrapper.clientWidth - 20;
+      const scale = maxW / 256;
+      canvas.style.width = Math.floor(256 * scale) + 'px';
+      canvas.style.height = Math.floor(240 * scale) + 'px';
+    }
+    scaleCanvas();
+    window.addEventListener('resize', scaleCanvas);
+
+    // Frame buffer
+    const buf = new ArrayBuffer(imgData.data.length);
+    const buf8 = new Uint8ClampedArray(buf);
+    const buf32 = new Uint32Array(buf);
+
+    // Audio
+    let audioCtx = null;
+    const SAMPLE_RATE = 44100;
+    const BUFFER_SIZE = 8192;
+    let audioSamples = [];
+    let scriptNode = null;
+
+    function initAudio() {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: SAMPLE_RATE });
+      scriptNode = audioCtx.createScriptProcessor(BUFFER_SIZE, 0, 1);
+      scriptNode.onaudioprocess = function(e) {
+        const output = e.outputBuffer.getChannelData(0);
+        const len = Math.min(audioSamples.length, output.length);
+        for (let i = 0; i < len; i++) {
+          output[i] = audioSamples[i];
+        }
+        for (let i = len; i < output.length; i++) {
+          output[i] = 0;
+        }
+        audioSamples.splice(0, len);
+      };
+      scriptNode.connect(audioCtx.destination);
+    }
+
+    // NES
+    const nes = new jsnes.NES({
+      onFrame: function(frameBuffer) {
+        for (let i = 0; i < 256 * 240; i++) {
+          buf32[i] = 0xFF000000 | (frameBuffer[i] & 0x00FFFFFF);
+        }
+        imgData.data.set(buf8);
+        ctx.putImageData(imgData, 0, 0);
+      },
+      onAudioSample: function(left, right) {
+        if (audioCtx) {
+          audioSamples.push((left + right) / 2);
+          if (audioSamples.length > SAMPLE_RATE) {
+            audioSamples.splice(0, audioSamples.length - BUFFER_SIZE);
+          }
+        }
+      }
+    });
+
+    // Load ROM
+    fetch('rom.nes')
+      .then(r => r.arrayBuffer())
+      .then(buf => {
+        const data = new Uint8Array(buf);
+        let str = '';
+        for (let i = 0; i < data.length; i++) {
+          str += String.fromCharCode(data[i]);
+        }
+        loadingEl.style.display = 'none';
+        startBtn.style.display = 'inline-block';
+        startBtn.addEventListener('click', function() {
+          startBtn.style.display = 'none';
+          powerLed.classList.add('on');
+          initAudio();
+          nes.loadROM(str);
+          frame();
+        });
+      })
+      .catch(() => {
+        loadingEl.textContent = 'ROM not found.';
+      });
+
+    function frame() {
+      nes.frame();
+      requestAnimationFrame(frame);
+    }
+
+    // Keyboard mapping
+    const BUTTONS = {
+      UP: jsnes.Controller.BUTTON_UP,
+      DOWN: jsnes.Controller.BUTTON_DOWN,
+      LEFT: jsnes.Controller.BUTTON_LEFT,
+      RIGHT: jsnes.Controller.BUTTON_RIGHT,
+      A: jsnes.Controller.BUTTON_A,
+      B: jsnes.Controller.BUTTON_B,
+      SELECT: jsnes.Controller.BUTTON_SELECT,
+      START: jsnes.Controller.BUTTON_START
+    };
+
+    const KEY_MAP = {
+      ArrowUp: 'UP', ArrowDown: 'DOWN', ArrowLeft: 'LEFT', ArrowRight: 'RIGHT',
+      KeyX: 'A', KeyZ: 'B', ShiftRight: 'SELECT', ShiftLeft: 'SELECT',
+      Enter: 'START'
+    };
+
+    document.addEventListener('keydown', function(e) {
+      const btn = KEY_MAP[e.code];
+      if (btn) {
+        nes.buttonDown(1, BUTTONS[btn]);
+        e.preventDefault();
+      }
+    });
+    document.addEventListener('keyup', function(e) {
+      const btn = KEY_MAP[e.code];
+      if (btn) {
+        nes.buttonUp(1, BUTTONS[btn]);
+        e.preventDefault();
+      }
+    });
+
+    // Virtual joystick
+    (function() {
+      var zone = document.getElementById('joystick-zone');
+      var knob = document.getElementById('joystick-knob');
+      var activeTouch = null;
+      var baseRadius = 55;
+      var knobRadius = 24;
+      var maxDist = baseRadius - knobRadius + 5;
+      var deadZone = 0.3;
+      var currentDirs = { UP: false, DOWN: false, LEFT: false, RIGHT: false };
+
+      function updateButtons(dirs) {
+        ['UP','DOWN','LEFT','RIGHT'].forEach(function(d) {
+          if (dirs[d] && !currentDirs[d]) nes.buttonDown(1, BUTTONS[d]);
+          if (!dirs[d] && currentDirs[d]) nes.buttonUp(1, BUTTONS[d]);
+          currentDirs[d] = dirs[d];
+        });
+      }
+
+      function handleMove(cx, cy) {
+        var rect = zone.getBoundingClientRect();
+        var centerX = rect.left + rect.width / 2;
+        var centerY = rect.top + rect.height / 2;
+        var dx = cx - centerX;
+        var dy = cy - centerY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > maxDist) { dx = dx / dist * maxDist; dy = dy / dist * maxDist; dist = maxDist; }
+        knob.style.transform = 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px))';
+        var norm = dist / maxDist;
+        if (norm < deadZone) {
+          updateButtons({ UP: false, DOWN: false, LEFT: false, RIGHT: false });
+          return;
+        }
+        var angle = Math.atan2(dy, dx);
+        var dirs = { UP: false, DOWN: false, LEFT: false, RIGHT: false };
+        if (angle > -2.75 && angle < -0.39) dirs.UP = true;
+        if (angle > 0.39 && angle < 2.75) dirs.DOWN = true;
+        if (Math.abs(angle) > 1.96) dirs.LEFT = true;
+        if (Math.abs(angle) < 1.18) dirs.RIGHT = true;
+        updateButtons(dirs);
+      }
+
+      function resetStick() {
+        knob.style.transform = 'translate(-50%, -50%)';
+        updateButtons({ UP: false, DOWN: false, LEFT: false, RIGHT: false });
+        activeTouch = null;
+      }
+
+      zone.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        activeTouch = e.changedTouches[0].identifier;
+        handleMove(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+      }, { passive: false });
+
+      document.addEventListener('touchmove', function(e) {
+        if (activeTouch === null) return;
+        for (var i = 0; i < e.changedTouches.length; i++) {
+          if (e.changedTouches[i].identifier === activeTouch) {
+            e.preventDefault();
+            handleMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+            return;
+          }
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchend', function(e) {
+        for (var i = 0; i < e.changedTouches.length; i++) {
+          if (e.changedTouches[i].identifier === activeTouch) { resetStick(); return; }
+        }
+      });
+      document.addEventListener('touchcancel', function(e) {
+        for (var i = 0; i < e.changedTouches.length; i++) {
+          if (e.changedTouches[i].identifier === activeTouch) { resetStick(); return; }
+        }
+      });
+    })();
+
+    // Action & meta button touch controls
+    document.querySelectorAll('[data-btn]').forEach(function(el) {
+      function press(e) {
+        e.preventDefault();
+        var btn = el.getAttribute('data-btn');
+        nes.buttonDown(1, BUTTONS[btn]);
+        el.classList.add('pressed');
+      }
+      function release(e) {
+        e.preventDefault();
+        var btn = el.getAttribute('data-btn');
+        nes.buttonUp(1, BUTTONS[btn]);
+        el.classList.remove('pressed');
+      }
+      el.addEventListener('touchstart', press, { passive: false });
+      el.addEventListener('touchend', release, { passive: false });
+      el.addEventListener('touchcancel', release, { passive: false });
+    });
+  </script>
+</body>
+</html>
