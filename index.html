@@ -27,7 +27,7 @@
     #console-body {
       background: linear-gradient(180deg, #d4d0c8 0%, #c8c4bc 40%, #b8b4ac 100%);
       border-radius: 12px 12px 8px 8px;
-      padding: 9px 22px 11px;
+      padding: 4px 22px 4px;
       box-shadow:
         0 2px 0 #e8e4dc inset,
         0 -2px 0 #a09c94 inset,
@@ -48,15 +48,15 @@
       right: 0;
       height: 6px;
       background: linear-gradient(90deg, #c8c4bc 0%, #c8c4bc 28%, #cc1228 28%, #cc1228 72%, #c8c4bc 72%);
-      border-radius: 12px 12px 0 0;
+      border-radius: 12px 12px 0 0; box-shadow: 0 2px 0 #e8e4dc inset, 2px 0 0 #bbb8b0 inset, -2px 0 0 #bbb8b0 inset, 0 0 0 0 transparent;
     }
 
     /* Dark cartridge slot stripe */
     #cartridge-slot {
       background: linear-gradient(180deg, #2a2a2a, #3a3a3a);
-      height: 8px;
+      height: 5px;
       border-radius: 3px;
-      margin: 0 40px 6px;
+      margin: 0 40px 3px;
       box-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 -1px 2px rgba(0,0,0,0.4) inset;
     }
 
@@ -64,14 +64,14 @@
     #flap-line {
       height: 2px;
       background: #a8a49c;
-      margin: 0 10px 7px;
+      margin: 0 10px 4px;
       box-shadow: 0 1px 0 rgba(255,255,255,0.2);
     }
 
     /* ── Title label ── */
     #title-label {
       text-align: center;
-      margin-bottom: 5px;
+      margin-bottom: 2px;
       white-space: nowrap;
     }
     #title-label .brand {
@@ -133,7 +133,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 5px;
+      margin-top: 3px;
       padding: 0 8px;
     }
     .led-group {
@@ -149,7 +149,7 @@
     }
     .led {
       width: 8px;
-      height: 8px;
+      height: 5px;
       border-radius: 50%;
       background: #3a1a1a;
       box-shadow: 0 0 2px rgba(0,0,0,0.5) inset;
@@ -161,7 +161,7 @@
 
     /* ── Buttons ── */
     #start-btn {
-      margin-top: 7px;
+      margin-top: 4px;
       padding: 6px 28px;
       font-size: 0.65rem;
       font-family: 'Press Start 2P', monospace;
@@ -188,7 +188,7 @@
     #loading {
       color: #cc1228;
       font-size: 0.6rem;
-      margin-top: 8px;
+      margin-top: 4px;
       letter-spacing: 1px;
       animation: blink 1s steps(1) infinite;
     }
@@ -198,7 +198,7 @@
 
     /* ── Desktop keyboard hints ── */
     #controls {
-      margin-top: 7px;
+      margin-top: 4px;
       font-size: 0.45rem;
       text-align: center;
       color: #666;
@@ -219,20 +219,22 @@
     /* ── Mobile Controller Area ── */
     #mobile-controls {
       display: none;
-      width: 100%;
-      max-width: 512px;
-      margin-top: 4px;
+      width: 95vw;
+      max-width: 540px;
+      margin-top: 0;
       padding: 8px 0;
       position: relative;
       height: 170px;
       user-select: none;
       -webkit-user-select: none;
       touch-action: none;
-      background: linear-gradient(180deg, #d4d0c8, #c0bdb5);
-      border-radius: 0 0 30px 30px / 0 0 20px 20px;
+      background: linear-gradient(180deg, #c8c4bc 0%, #b8b4ac 100%);
+      border-radius: 0 0 12px 12px;
       box-shadow:
-        0 4px 12px rgba(0,0,0,0.3),
-        0 1px 0 #e0dcd4 inset;
+        0 8px 32px rgba(0,0,0,0.5),
+        2px 0 0 #bbb8b0 inset,
+        -2px 0 0 #bbb8b0 inset,
+        0 -2px 0 #a09c94 inset;
     }
 
     /* Joystick – dark recessed circle like NES d-pad area */
@@ -351,7 +353,7 @@
     .meta-label {
       font-size: 0.32rem;
       color: #777;
-      margin-top: 5px;
+      margin-top: 3px;
       letter-spacing: 1px;
       text-transform: uppercase;
       font-family: 'Press Start 2P', monospace;
@@ -359,7 +361,7 @@
 
     /* ── Bottom branding ── */
     #bottom-brand {
-      margin-top: 8px;
+      margin-top: 4px;
       font-size: 0.35rem;
       color: #444;
       letter-spacing: 3px;
@@ -369,9 +371,14 @@
     @media (pointer: coarse) {
       #mobile-controls { display: block; }
       #controls { display: none; }
+      #bottom-brand { display: none; }
       #console-body {
         border-radius: 12px 12px 0 0;
-        padding-bottom: 7px;
+        padding-bottom: 2px;
+        box-shadow:
+          0 2px 0 #e8e4dc inset,
+          2px 0 0 #bbb8b0 inset,
+          -2px 0 0 #bbb8b0 inset;
       }
     }
 
